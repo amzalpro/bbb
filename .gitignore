@@ -1,0 +1,14 @@
+# Systèmes
+.DS_Store
+Thumbs.db
+
+# Éditeurs
+.vscode/
+.idea/
+
+# Archives temporaires
+*.zip
+
+# Build futur / cache
+dist/
+.tmp/

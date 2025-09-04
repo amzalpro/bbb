@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Gestion Scolaire Offline</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="css/style.css" />
+  <!-- JSZip (export ZIP) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" integrity="sha512-3H6g4GecVrmG1Kuk+P6lJZ4ZjrT3l9g7NV7O+JdQmimLKJ0a97vqzgfE4eT0r3i7IQgXQbbQWVFTig84yY3FhA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+<body>
+  <header>
+    <h1>Gestion Scolaire Offline</h1>
+    <div class="actions">
+      <button id="btnThemeToggle" title="Changer de thème">Thème</button>
+      <button id="btnExportJSON">Exporter JSON</button>
+      <button id="btnExportZIP">Exporter ZIP</button>
+      <!-- TODO: Ajouter bouton Import JSON (fusion/remplacement) -->
+      <!-- <input type="file" id="inputImportJSON" accept="application/json" hidden /> -->
+    </div>
+  </header>
+
+  <main id="app">
+    <section class="panel" id="panelClasses">
+      <h2>Classes</h2>
+      <ul id="classList"></ul>
+      <form id="formAddClass">
+        <input type="text" id="inputClassName" placeholder="Nom de la classe" required />
+        <button type="submit">Ajouter classe</button>
+      </form>
+    </section>
+
+    <section class="panel" id="panelClassDetail">
+      <div id="classDetailContainer" class="hidden">
+        <h2 id="classTitle"></h2>
+        <div class="tabs">
+          <button data-tab="students" class="tab-btn active">Élèves</button>
+          <button data-tab="competences" class="tab-btn">Compétences</button>
+          <button data-tab="evaluations" class="tab-btn">Évaluations</button>
+          <button data-tab="notes" class="tab-btn">Notes</button>
+          <button data-tab="absences" class="tab-btn">Absences</button>
+        </div>
+
+        <div class="tab-content active" id="tab-students">
+          <ul id="studentList"></ul>
+          <form id="formAddStudent">
+            <input type="text" id="inputStudentFirst" placeholder="Prénom" required />
+            <input type="text" id="inputStudentLast" placeholder="Nom" required />
+            <button type="submit">Ajouter élève</button>
+          </form>
+        </div>
+
+        <div class="tab-content" id="tab-competences">
+          <ul id="competenceList"></ul>
+          <form id="formAddCompetence">
+            <input type="text" id="inputCompetenceLabel" placeholder="Libellé" required />
+            <input type="text" id="inputCompetenceDesc" placeholder="Description (optionnel)" />
+            <button type="submit">Ajouter compétence</button>
+          </form>
+        </div>
+
+        <div class="tab-content" id="tab-evaluations">
+          <ul id="evaluationList"></ul>
+          <form id="formAddEvaluation">
+            <input type="text" id="inputEvaluationTitle" placeholder="Titre" required />
+            <input type="date" id="inputEvaluationDate" required />
+            <select id="selectEvaluationCompetence" required></select>
+            <button type="submit">Ajouter évaluation</button>
+          </form>
+        </div>
+
+        <div class="tab-content" id="tab-notes">
+          <div id="notesTableWrapper"></div>
+        </div>
+
+        <div class="tab-content" id="tab-absences">
+          <ul id="absenceList"></ul>
+          <form id="formAddAbsence">
+            <select id="selectAbsenceStudent" required></select>
+            <input type="date" id="inputAbsenceDate" required />
+            <button type="submit">Marquer absence</button>
+          </form>
+        </div>
+
+        <div class="danger-zone">
+          <button id="btnDeleteClass" class="danger">Supprimer cette classe</button>
+        </div>
+      </div>
+      <div id="noClassSelected" class="placeholder">
+        Sélectionnez une classe pour voir les détails.
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <small>Offline — Données stockées localement. (Aucune transmission serveur)</small>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/models.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/export.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
