@@ -1,22 +1,38 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <title>Gestion Scolaire Offline</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#2563eb">
+  <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="css/style.css" />
-  <!-- JSZip (export ZIP) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" integrity="sha512-3H6g4GecVrmG1Kuk+P6lJZ4ZjrT3l9g7NV7O+JdQmimLKJ0a97vqzgfE4eT0r3i7IQgXQbbQWVFTig84yY3FhA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <link rel="icon" href="icons/icon-192.png">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"
+          integrity="sha512-3H6g4GecVrmG1Kuk+P6lJZ4ZjrT3l9g7NV7O+JdQmimLKJ0a97vqzgfE4eT0r3i7IQgXQbbQWVFTig84yY3FhA=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
   <header>
     <h1>Gestion Scolaire Offline</h1>
     <div class="actions">
       <button id="btnThemeToggle" title="Changer de thème">Thème</button>
-      <button id="btnExportJSON">Exporter JSON</button>
-      <button id="btnExportZIP">Exporter ZIP</button>
-      <!-- TODO: Ajouter bouton Import JSON (fusion/remplacement) -->
-      <!-- <input type="file" id="inputImportJSON" accept="application/json" hidden /> -->
+      <button id="btnExportJSON" title="Exporter toutes les données JSON">JSON</button>
+      <button id="btnExportZIP" title="Exporter en ZIP (JSON + CSV)">ZIP</button>
+      <button id="btnExportCSVNotes" title="Exporter les notes en CSV">CSV Notes</button>
+      <button id="btnExportCSVAbs" title="Exporter les absences en CSV">CSV Absences</button>
+      <label class="import-label" title="Importer un fichier JSON exporté">
+        Import
+        <input type="file" id="inputImportJSON" accept="application/json" hidden>
+      </label>
+      <select id="selectImportMode" title="Mode d'import">
+        <option value="merge">Fusion</option>
+        <option value="replace">Remplacer</option>
+      </select>
+      <button id="btnShowAverages" title="Voir les moyennes">Moyennes</button>
+      <button id="btnShowSeating" title="Gérer le plan de classe">Plan</button>
+      <button id="btnCreateSnapshot" title="Créer un snapshot (sauvegarde locale horodatée)">Snapshot+</button>
+      <button id="btnShowSnapshots" title="Voir l'historique des snapshots">Historique</button>
     </div>
   </header>
 
@@ -28,6 +44,9 @@
         <input type="text" id="inputClassName" placeholder="Nom de la classe" required />
         <button type="submit">Ajouter classe</button>
       </form>
+      <div style="margin-top:.75rem;">
+        <button id="btnLoadSeed" style="width:100%;background:var(--accent);border-color:var(--accent)">Charger jeu de démo</button>
+      </div>
     </section>
 
     <section class="panel" id="panelClassDetail">
@@ -35,10 +54,10 @@
         <h2 id="classTitle"></h2>
         <div class="tabs">
           <button data-tab="students" class="tab-btn active">Élèves</button>
-          <button data-tab="competences" class="tab-btn">Compétences</button>
-          <button data-tab="evaluations" class="tab-btn">Évaluations</button>
-          <button data-tab="notes" class="tab-btn">Notes</button>
-          <button data-tab="absences" class="tab-btn">Absences</button>
+            <button data-tab="competences" class="tab-btn">Compétences</button>
+            <button data-tab="evaluations" class="tab-btn">Évaluations</button>
+            <button data-tab="notes" class="tab-btn">Notes</button>
+            <button data-tab="absences" class="tab-btn">Absences</button>
         </div>
 
         <div class="tab-content active" id="tab-students">
@@ -93,14 +112,45 @@
   </main>
 
   <footer>
-    <small>Offline — Données stockées localement. (Aucune transmission serveur)</small>
+    <small>Offline — Données locales (aucun envoi serveur) • PWA disponible hors connexion</small>
   </footer>
 
-  <!-- Scripts -->
-  <script src="js/models.js"></script>
-  <script src="js/storage.js"></script>
-  <script src="js/ui.js"></script>
-  <script src="js/export.js"></script>
-  <script src="js/app.js"></script>
+  <!-- Backdrop -->
+  <div class="modal-backdrop hidden" id="modalBackdrop"></div>
+
+  <!-- Modal Moyennes -->
+  <div class="modal hidden" id="modalAverages">
+    <div class="modal-header">
+      <h3>Moyennes</h3>
+      <button class="close-btn" data-close="modalAverages">×</button>
+    </div>
+    <div class="modal-body" id="averagesContent"></div>
+  </div>
+
+  <!-- Modal Plan -->
+  <div class="modal hidden" id="modalSeating">
+    <div class="modal-header">
+      <h3>Plan de classe</h3>
+      <button class="close-btn" data-close="modalSeating">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="seating-toolbar">
+        <small>Glisser les élèves. Positions sauvegardées automatiquement.</small>
+        <button id="btnResetSeating" class="danger">Réinitialiser</button>
+      </div>
+      <div id="seatingArea" class="seating-area"></div>
+    </div>
+  </div>
+
+  <!-- Modal Snapshots -->
+  <div class="modal hidden" id="modalSnapshots">
+    <div class="modal-header">
+      <h3>Snapshots (Historique local)</h3>
+      <button class="close-btn" data-close="modalSnapshots">×</button>
+    </div>
+    <div class="modal-body" id="snapshotsContent"></div>
+  </div>
+
+  <script type="module" src="js/app.js"></script>
 </body>
 </html>
